@@ -76,10 +76,16 @@ class Seeker{
 int main(int argc, char **argv){
    ros::init(argc, argv, "seeker_node"); 
    Seeker seeker;
-   ros::Publisher velPub = seeker.getVelPub();
-   ros::Publisher dplPub = seeker.getDplPub();
+   const float forward 	       = 0.2;
+   const float rot_clock_wise  = -0.1;
+   const float rot_counter_cw  = 0.1;
+   const int   rate	       = 5;
+   const ros::Publisher velPub = seeker.getVelPub();
+   const ros::Publisher dplPub = seeker.getDplPub();
 
-   ros::Rate loop_rate(5);
+   ros::Rate loop_rate(rate);
+
+   if(!ros::ok()){ return 1;}//error check
 
    while(ros::ok()){
 	geometry_msgs::Twist   geoMsg;
@@ -89,22 +95,18 @@ int main(int argc, char **argv){
 	bool  action = seeker.getAction();
 	bool  driveMode = seeker.getDriveMode();
 	float lftLsr = seeker.getLftLsr();
-	float rgtLsr = seeker.getRgtLsr();
-	
-	const float forward = 0.2;
-	const float rot_clockWise = -0.1;
-	const float rot_counterCW = 0.1;	
+	float rgtLsr = seeker.getRgtLsr();	
 
 	if(action){
 	    if((isnan(lftLsr) || lftLsr==0.0) && !driveMode){ //reconnaisance       
-		geoMsg.angular.z = rot_counterCW * 3;
+		geoMsg.angular.z = rot_counter_cw * 3;
 	    }else{ //seek out
 		seeker.setDriveMode(true);
 		if(isnan(lftLsr)){
-		    geoMsg.angular.z = rot_clockWise;
+		    geoMsg.angular.z = rot_clock_wise;
 		    geoMsg.linear.x = forward;
 		}else if(isnan(rgtLsr)){
-		    geoMsg.angular.z = rot_counterCW;	
+		    geoMsg.angular.z = rot_counter_cw;	
 		    geoMsg.linear.x = forward;
 		}else{
 		    geoMsg.linear.x = forward;
@@ -118,7 +120,7 @@ int main(int argc, char **argv){
     loop_rate.sleep();
   }
 	    
-  return 1;
+  return 0;
 }
 
 
