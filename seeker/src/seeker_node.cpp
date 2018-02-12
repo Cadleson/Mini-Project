@@ -36,7 +36,7 @@ class Seeker{
 	const int margin = 5;  
     }
 
-    void updateValues(const sensor_msgs::LaserScan msg){
+    void updateValues(const sensor_msgs::LaserScan& msg){
 	int vecLen = msg.ranges.size();
 	int halfVec = vecLen/2;
 	m_ctrLsr = msg.ranges[halfVec];
@@ -91,19 +91,23 @@ int main(int argc, char **argv){
 	float lftLsr = seeker.getLftLsr();
 	float rgtLsr = seeker.getRgtLsr();
 	
+	const float forward = 0.2;
+	const float rot_clockWise = -0.1;
+	const float rot_counterCW = 0.1;	
+
 	if(action){
 	    if((isnan(lftLsr) || lftLsr==0.0) && !driveMode){ //reconnaisance       
-		geoMsg.angular.z = 0.3;
+		geoMsg.angular.z = rot_counterCW * 3;
 	    }else{ //seek out
 		seeker.setDriveMode(true);
 		if(isnan(lftLsr)){
-		    geoMsg.angular.z = -0.1;
-		    geoMsg.linear.x = 0.2;
+		    geoMsg.angular.z = rot_clockWise;
+		    geoMsg.linear.x = forward;
 		}else if(isnan(rgtLsr)){
-		    geoMsg.angular.z = 0.1;	
-		    geoMsg.linear.x = 0.2;
+		    geoMsg.angular.z = rot_counterCW;	
+		    geoMsg.linear.x = forward;
 		}else{
-		    geoMsg.linear.x = 0.2;
+		    geoMsg.linear.x = forward;
 		}	
 	    }
 	}
