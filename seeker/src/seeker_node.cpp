@@ -18,6 +18,7 @@ class Seeker{
 
 	bool  m_action, m_drive_mode;
 	float m_displace, m_ctrLsr, m_lftLsr, m_rgtLsr;
+	int   margin;
 
     public: Seeker(){
 	m_sub        = m_nh.subscribe("/scan", 100, &Seeker::updateValues, this);
@@ -30,17 +31,20 @@ class Seeker{
 	m_displace   = 0.0; 
 	m_ctrLsr     = 0.0; 
 	m_lftLsr     = 0.0; 
-	m_rgtLsr     = 0.0;   
+	m_rgtLsr     = 0.0;
+
+	const int margin = 5;  
     }
 
     void updateValues(const sensor_msgs::LaserScan msg){
 	int vecLen = msg.ranges.size();
-	m_ctrLsr = msg.ranges[vecLen/2];
-	m_lftLsr = msg.ranges[(vecLen/2) - 5];
-	m_rgtLsr = msg.ranges[(vecLen/2) + 5];
+	int halfVec = vecLen/2;
+	m_ctrLsr = msg.ranges[halfVec];
+	m_lftLsr = msg.ranges[(halfVec) - margin];
+	m_rgtLsr = msg.ranges[(halfVec) + margin];
 	m_displace = (m_lftLsr + m_rgtLsr)/2;
-	ROS_INFO("Left Laser: [%f]", m_lftLsr);
-	ROS_INFO("Right Laser: [%f]", m_rgtLsr);
+	//ROS_INFO("Left Laser: [%f]", m_lftLsr);
+	//ROS_INFO("Right Laser: [%f]", m_rgtLsr);
     }
 
     bool enableService(std_srvs::SetBool::Request  &req, std_srvs::SetBool::Response &res){
